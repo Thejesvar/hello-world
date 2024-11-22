@@ -1,0 +1,194 @@
+name: PP Service Restart
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Choose the environment to restart the service'
+        required: true
+        default: 'prod'
+        type: choice
+        options:
+          - prod
+          - non-prod
+
+jobs:
+  restart-service-prod:
+    if: ${{ github.event.inputs.environment == 'prod' }}
+    runs-on: tjmac
+
+    steps:
+      - name: Creating a directory in the document folder in Prod
+        run: |
+          aws ssm send-command \
+          --instance-ids i-0b5b6c38be13948e6 \
+          --document-name "AWS-RunPowerShellScript" \
+          --parameters 'commands=["New-Item -Path \"C:\Users\Administrator\Documents\test\new-directory1\" -ItemType Directory"]' \
+          --region us-east-1 \
+          --no-cli-pager 
+    # - name: Notify Slack on job start
+    #   if: always()
+    #   uses: slackapi/slack-github-action@v1.27.0
+    #   with:
+    #     payload: |
+    #       {
+    #         "text": "> STARTED: Job '${{ github.workflow }}' started by ${{ github.actor }}, at\n>${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\n>Print Preview function service restart in PROD has started.",
+    #         "attachments": [
+    #           {
+    #             "color": "#42f545",
+    #             "fields": [
+    #               {
+    #                 "title": "Job",
+    #                 "value": "${{ github.workflow }}",
+    #                 "short": true
+    #               },
+    #               {
+    #                 "title": "Status",
+    #                 "value": "started",
+    #                 "short": true
+    #               }
+    #             ]
+    #           }
+    #         ]
+    #       }
+    #   env:
+    #     SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+  
+    # - name: Checkout repository
+    #   uses: actions/checkout@v2
+
+    # - name: Stopping the Print Preview Service in Prod
+    #   run: |
+    #     aws ssm send-command \
+    #       --instance-ids i-0b5b6c38be13948e6 \
+    #       --document-name "AWS-RunPowerShellScript" \
+    #       --parameters 'commands=["Stop-Service -Name \"InDesignServerService x64\" -Force"]' \
+    #       --region us-east-1 \
+    #       --no-cli-pager
+
+    # - name: Starting the Print Preview Service in Prod
+    #   run: |
+    #     aws ssm send-command \
+    #       --instance-ids i-0b5b6c38be13948e6 \
+    #       --document-name "AWS-RunPowerShellScript" \
+    #       --parameters 'commands=["Start-Service -Name \"InDesignServerService x64\""]' \
+    #       --region us-east-1 \
+    #       --no-cli-pager
+
+    # - name: Notify Slack on job completion
+    #   if: always()
+    #   uses: slackapi/slack-github-action@v1.27.0
+    #   with:
+    #     payload: |
+    #       {
+    #         "text": "> ${{ job.status == 'success' && 'SUCCESSFUL' || job.status == 'failure' && 'FAILED' || job.status == 'cancelled' && 'ABORTED' }}: Job '${{ github.workflow }}' started by ${{ github.actor }}, at\n>${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\n>${{ job.status == 'success' && 'Print Preview function service restart in PROD completed successfully.' || job.status == 'failure' && 'Print Preview function service restart in PROD has failed.' || job.status == 'cancelled' && 'Print Preview function service restart in PROD has aborted.' }}",
+    #         "attachments": [
+    #           {
+    #             "color": "${{ job.status == 'success' && 'good' || job.status == 'failure' && 'danger' || job.status == 'cancelled' && 'warning' || 'warning' }}",
+    #             "fields": [
+    #               {
+    #                 "title": "Job",
+    #                 "value": "${{ github.workflow }}",
+    #                 "short": true
+    #               },
+    #               {
+    #                 "title": "Status",
+    #                 "value": "${{ job.status }}",
+    #                 "short": true
+    #               }
+    #             ]
+    #           }
+    #         ]
+    #       }
+    #   env:
+    #     SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+  restart-service-non-prod:
+    if: ${{ github.event.inputs.environment == 'non-prod' }}
+    runs-on: elsa-dev-runner
+
+    steps:
+      - name: Creating a directory in the document folder in non-Prod
+        run: |
+          aws ssm send-command \
+          --instance-ids i-0fdea9527bff9f382 \
+          --document-name "AWS-RunPowerShellScript" \
+          --parameters 'commands=["New-Item -Path \"C:\Users\Administrator\Documents\test\new-directory2\" -ItemType Directory"]' \
+          --region us-east-1 \
+          --no-cli-pager
+    # - name: Notify Slack on job start
+    #   if: always()
+    #   uses: slackapi/slack-github-action@v1.27.0
+    #   with:
+    #     payload: |
+    #       {
+    #         "text": "> STARTED: Job '${{ github.workflow }}' started by ${{ github.actor }}, at\n>${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\n>Print Preview function service restart in NON-PROD has started.",
+    #         "attachments": [
+    #           {
+    #             "color": "#42f545",
+    #             "fields": [
+    #               {
+    #                 "title": "Job",
+    #                 "value": "${{ github.workflow }}",
+    #                 "short": true
+    #               },
+    #               {
+    #                 "title": "Status",
+    #                 "value": "started",
+    #                 "short": true
+    #               }
+    #             ]
+    #           }
+    #         ]
+    #       }
+    #   env:
+    #     SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+  
+    # - name: Checkout repository
+    #   uses: actions/checkout@v2
+
+    # - name: Stopping the Print Preview Service in Non-Prod
+    #   run: |
+    #     aws ssm send-command \
+    #       --instance-ids i-0fdea9527bff9f382 \
+    #       --document-name "AWS-RunPowerShellScript" \
+    #       --parameters 'commands=["Stop-Service -Name \"InDesignServerService x64\" -Force"]' \
+    #       --region us-east-1 \
+    #       --no-cli-pager
+
+    # - name: Starting the Print Preview Service in Non-Prod
+    #   run: |
+    #     aws ssm send-command \
+    #       --instance-ids i-0fdea9527bff9f382 \
+    #       --document-name "AWS-RunPowerShellScript" \
+    #       --parameters 'commands=["Start-Service -Name \"InDesignServerService x64\""]' \
+    #       --region us-east-1 \
+    #       --no-cli-pager
+
+    # - name: Notify Slack on job completion
+    #   if: always()
+    #   uses: slackapi/slack-github-action@v1.27.0
+    #   with:
+    #     payload: |
+    #       {
+    #         "text": "> ${{ job.status == 'success' && 'SUCCESSFUL' || job.status == 'failure' && 'FAILED' || job.status == 'cancelled' && 'ABORTED' }}: Job '${{ github.workflow }}' started by ${{ github.actor }}, at\n>${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\n>${{ job.status == 'success' && 'Print Preview function service restart in NON-PROD completed successfully.' || job.status == 'failure' && 'Print Preview function service restart in NON-PROD has failed.' || job.status == 'cancelled' && 'Print Preview function service restart in NON-PROD has aborted.' }}",
+    #         "attachments": [
+    #           {
+    #             "color": "${{ job.status == 'success' && 'good' || job.status == 'failure' && 'danger' || job.status == 'cancelled' && 'warning' || 'warning' }}",
+    #             "fields": [
+    #               {
+    #                 "title": "Job",
+    #                 "value": "${{ github.workflow }}",
+    #                 "short": true
+    #               },
+    #               {
+    #                 "title": "Status",
+    #                 "value": "${{ job.status }}",
+    #                 "short": true
+    #               }
+    #             ]
+    #           }
+    #         ]
+    #       }
+    #   env:
+    #     SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
