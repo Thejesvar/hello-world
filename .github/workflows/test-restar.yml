@@ -11,6 +11,11 @@ on:
         options:
           - prod
           - non-prod
+      branch:
+        description: 'Choose the branch to run the workflow on'
+        required: true
+        default: 'master'
+        type: string
 
 jobs:
   restart-service-prod:
